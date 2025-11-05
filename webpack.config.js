@@ -20,6 +20,10 @@ module.exports = {
     alias: {
       ...sharedMappings.getAliases(),
     },
+    fallback: {
+      fs: require.resolve("browserify-fs"),
+      path: require.resolve("path-browserify"),
+    },
   },
   experiments: {
     outputModule: true,
