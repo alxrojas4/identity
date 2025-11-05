@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4203",
-    "build": "ng build",
+    "build": "ng --configuration production --base-href /identity/ && cp dist/index.html dist/404.html",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "run:all": "node node_modules/@angular-architects/module-federation/src/server/mf-dev-server.js"
