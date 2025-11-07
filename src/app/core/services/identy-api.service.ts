@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { BaseHttpService } from './base-http.service';
 import { environment } from '../../../environments/environment';
+import { base64ToBlob } from '../../../utils/base64-to-blob.util';
 
 /**
  * API endpoints for the Identy service.
@@ -161,15 +162,77 @@ export class IdentyApiService {
   //   );
   // }
 
-  // TODO: Implement face verification endpoint
-  // async verifyWithPicId(blob: Blob, picId: string): Promise<any> {
-  //   const formData = new FormData();
-  //   formData.append('file', blob);
-  //   formData.append('picId', picId);
-  //
-  //   const url = this.buildUrl(IdentyApiEndpoint.VERIFY_WITH_PIC_ID);
-  //   return await this.httpService.toPromise(
-  //     this.httpService.post<any>(url, formData)
-  //   );
-  // }
+  /**
+   * Verifies a face capture against a reference image (picID).
+   *
+   * This method performs face matching by comparing the captured face image
+   * against a reference image from the DNI front.
+   *
+   * @param {Blob} blob - The captured face image blob
+   * @param {string} picId - The reference image (base64 string from DNI front)
+   * @param {string} securityLevel - The security level for matching (defaults to environment value)
+   * @returns {Promise<{match: boolean; messageValidator: string}>} Match result with validation message
+   *
+   * @throws {Error} If the server request fails
+   *
+   * @example
+   * ```typescript
+   * const blob = await faceSDK.capture();
+   * const dniFrontImage = identityStore.dniFrontImage();
+   * const result = await identyService.verifyWithPicId(blob, dniFrontImage);
+   * if (result.match) {
+   *   // Face matches DNI
+   * }
+   * ```
+   */
+  async verifyWithPicId(
+    blob: Blob,
+    picId: string,
+    securityLevel?: string
+  ): Promise<{ match: boolean; messageValidator: string }> {
+    const formData = new FormData();
+
+    // Convert base64 picId to Blob
+    const picIdBlob = base64ToBlob(picId, 'image/jpeg');
+
+    formData.append('file', blob, 'face-capture.jpg');
+    formData.append('picID', picIdBlob, 'dni-front.jpg');
+    formData.append('template', 'JPEG');
+    formData.append(
+      'level',
+      securityLevel ?? environment.IDENTY_SECURITY_MATCH_FACE ?? 'HIGH'
+    );
+
+    // Use the full URL from environment for match endpoint
+    const url =
+      environment.IDENTY_API_MATCH_URL ??
+      this.buildUrl(IdentyApiEndpoint.VERIFY_WITH_PIC_ID);
+
+    const headers = this.getDefaultHeaders({ 'X-DEBUG': '1' });
+
+    try {
+      const response = await this.httpService.toPromise(
+        this.httpService.post<{ possibleMatch: boolean }>(
+          url,
+          formData,
+          headers
+        )
+      );
+
+      const match = response.possibleMatch ?? false;
+
+      if (match) {
+        return { match: true, messageValidator: 'OK' };
+      } else {
+        return {
+          match: false,
+          messageValidator: 'FEEDBACK_MATCHING_ERROR',
+        };
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.error?.message || error.message || 'FEEDBACK_MATCHING_ERROR';
+      return { match: false, messageValidator: errorMessage };
+    }
+  }
 }

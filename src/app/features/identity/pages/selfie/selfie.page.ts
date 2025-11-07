@@ -17,6 +17,8 @@ import { NavigationComponent } from '../../components/navigation/navigation.comp
 import { TitleSectionComponent } from '../../components/title-section/title-section.component';
 import { getFaceSdkOptions } from './face-sdk-options.config';
 import { IdentyApiService } from '../../../../core/services/identy-api.service';
+import { validateFace } from './selfie.validate';
+import { delay } from '../../../../../utils/delay.util';
 
 @Component({
   selector: 'app-selfie-page',
@@ -98,11 +100,17 @@ export class SelfiePageComponent
       const blob = await faceSDK.capture();
       this.currentStep.set('SUCCESS');
 
-      await this.delay(1000);
+      await delay(1000);
       this.currentStep.set('TRANSITION');
 
       const photoData = await this.identyApiService.processFaceCapture(blob);
-      const validationResult = await this.validateFace(photoData, blob);
+      const dniFrontImage = this.identityStore.dniFrontImage();
+      const validationResult = await validateFace(
+        photoData,
+        blob,
+        this.identyApiService,
+        dniFrontImage
+      );
 
       if (validationResult.isValid) {
         const processFace = structuredClone(photoData);
@@ -112,7 +120,7 @@ export class SelfiePageComponent
         this.identityStore.setSelfieImage(imageData);
         this.isCaptured = true;
 
-        await this.delay(3000);
+        await delay(3000);
         this.identityStore.setCurrentStep('success');
       } else {
         this.currentStep.set('STOP');
@@ -175,28 +183,6 @@ export class SelfiePageComponent
   }
 
   /**
-   * Validates the captured face image.
-   *
-   * This is a placeholder implementation. You should implement the actual
-   * validation logic based on your requirements.
-   *
-   * @param {any} photoData - The processed photo data from the server
-   * @param {Blob} blob - The original captured image blob
-   * @returns {Promise<{isValid: boolean; message?: string}>} Validation result
-   */
-  private async validateFace(
-    photoData: any,
-    blob: Blob
-  ): Promise<{ isValid: boolean; message?: string }> {
-    // TODO: Implement actual face validation logic
-    // For now, we'll assume the image is valid if we have photoData
-    if (photoData && photoData.data) {
-      return { isValid: true };
-    }
-    return { isValid: false, message: 'FEEDBACK_RETRY' };
-  }
-
-  /**
    * Handles validation errors.
    *
    * @param {string} message - The error message
@@ -252,16 +238,6 @@ export class SelfiePageComponent
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
-  }
-
-  /**
-   * Utility function to create a delay.
-   *
-   * @param {number} ms - Milliseconds to delay
-   * @returns {Promise<void>} A promise that resolves after the delay
-   */
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   override ngOnDestroy(): void {
