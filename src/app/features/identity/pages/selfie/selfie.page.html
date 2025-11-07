@@ -12,15 +12,20 @@
         [showSuccess]="isCaptured"
         [successTitle]="successTitle()"
       ></app-title-section>
+      <div class="capture-face">
+        <div class="capture-face__content">
+          <div #identyRef></div>
+        </div>
+      </div>
 
-      <div class="selfie-page__camera-container">
+      <!-- <div class="selfie-page__camera-container">
         <app-camera
           type="selfie"
           [isActive]="isCameraActive && !isCaptured"
           (imageCaptured)="onImageCaptured($event)"
           (cameraError)="onCameraError($event)"
         ></app-camera>
-      </div>
+      </div> -->
     </main>
 
     @if (errorMessage) {

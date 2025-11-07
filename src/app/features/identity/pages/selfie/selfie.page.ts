@@ -4,6 +4,8 @@ import {
   OnInit,
   OnDestroy,
   inject,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { FaceSDK } from '@identy/identy-face';
 
@@ -12,12 +14,11 @@ import { TextService } from '../../../../core/services/text.service';
 import { IdentityStoreService } from '../../../../core/services/identity-store.service';
 import { NavigationComponent } from '../../components/navigation/navigation.component';
 import { TitleSectionComponent } from '../../components/title-section/title-section.component';
-import { CameraComponent } from '../../components/camera/camera.component';
 
 @Component({
   selector: 'app-selfie-page',
   standalone: true,
-  imports: [NavigationComponent, TitleSectionComponent, CameraComponent],
+  imports: [NavigationComponent, TitleSectionComponent],
   templateUrl: './selfie.page.html',
   styleUrl: './selfie.page.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -30,6 +31,8 @@ export class SelfiePageComponent
   isCameraActive = false;
   isCaptured = false;
   errorMessage = '';
+
+  @ViewChild('identyRef') identyRef!: ElementRef<HTMLDivElement>;
 
   private readonly textService = inject(TextService);
   private readonly identityStore = inject(IdentityStoreService);
@@ -57,6 +60,35 @@ export class SelfiePageComponent
     }, 0);
   }
 
+  runFaceCapture() {}
+
+  /**
+   * Waits for the Face SDK to inject its container into the DOM,
+   * removes unwanted elements, and moves it into the provided host element.
+   */
+  attachSdkVideoToHost(hostRef: ElementRef<HTMLElement>): void {
+    const interval = setInterval(() => {
+      const identyVideo = document.getElementsByClassName(
+        'ui-dialog identy-face-dialog identy-capture-dialog ui-widget ui-widget-content ui-front'
+      );
+
+      if (identyVideo.length > 0) {
+        const parent = identyVideo[0] as HTMLElement;
+
+        const titleBars = parent.getElementsByClassName(
+          'ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix'
+        );
+        Array.from(titleBars).forEach((child) => child.remove());
+
+        Array.from(identyVideo).forEach((identyElement) => {
+          hostRef.nativeElement.appendChild(identyElement);
+        });
+
+        clearInterval(interval);
+      }
+    }, 100);
+  }
+
   override ngOnDestroy(): void {
     this.isCameraActive = false;
     this.destroySdk();
@@ -80,6 +112,7 @@ export class SelfiePageComponent
   private initializeCamera(): void {
     // Set camera as active immediately to trigger camera initialization
     this.isCameraActive = true;
+    this.runFaceCapture();
   }
 
   /**
