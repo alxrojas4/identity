@@ -27,7 +27,7 @@ defineCustomElements();
     ]);
     console.log('result::', result);
   } catch (error) {
-    console.log(error);
+    console.error('Error in pre-initialization', error);
   }
 })();
 

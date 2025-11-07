@@ -91,6 +91,7 @@ export class OnboardingPageComponent extends BaseComponent implements OnInit {
    */
   continue(): void {
     this.identityStore.setCurrentStep('dni-front');
+    // this.identityStore.setCurrentStep('selfie');
   }
 
   /**

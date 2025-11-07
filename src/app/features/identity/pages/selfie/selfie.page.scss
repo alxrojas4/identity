@@ -66,3 +66,71 @@
     }
   }
 }
+
+.capture-face {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 234px);
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    margin: 0px 20px 0px 20px;
+    height: 100%;
+
+    :global(div[role="dialog"].identy-face-dialog.ui-dialog) {
+      top: 0px !important;
+      left: 0px !important;
+      position: relative !important;
+    }
+
+    :global(
+        div[role="dialog"].identy-face-dialog.ui-dialog .ui-widget-content
+      ) {
+      border: none !important;
+      background: transparent !important;
+      color: inherit !important;
+    }
+
+    &__camera {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ccc;
+      background-color: #aca7a7;
+      display: block;
+      margin: 0 auto;
+    }
+
+    &__advice-text {
+      background-color: #fffaeb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 18px;
+
+      &__title {
+        margin: 0;
+        font-weight: bold;
+      }
+
+      &__text {
+        margin: 4px 0;
+      }
+
+      &__button {
+        font-size: 18px;
+        background-color: transparent;
+        border: none;
+        color: #127277;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: bold;
+      }
+    }
+  }
+}
