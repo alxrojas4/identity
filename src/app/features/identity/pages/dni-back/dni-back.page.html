@@ -13,15 +13,20 @@
         [showSuccess]="isCaptured"
         [successTitle]="successTitle()"
       ></app-title-section>
+      <div class="capture-document">
+        <div class="capture-document__content">
+          <div #identyRef></div>
+        </div>
+      </div>
 
-      <div class="dni-back-page__camera-container">
+      <!-- <div class="dni-back-page__camera-container">
         <app-camera
           type="dni-back"
           [isActive]="isCameraActive && !isCaptured"
           (imageCaptured)="onImageCaptured($event)"
           (cameraError)="onCameraError($event)"
         ></app-camera>
-      </div>
+      </div> -->
     </main>
 
     @if (errorMessage) {

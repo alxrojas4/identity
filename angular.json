@@ -22,8 +22,31 @@
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/styles.scss"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/@identy/identy-face/dist/assets",
+                "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@identy/identy-ocr/dist/assets",
+                "output": "/assets/"
+              }
+            ],
+            "styles": [
+              "src/styles.scss",
+              "./node_modules/@identy/identy-ocr/dist/identy-ocr-style.css"
+            ],
+            "allowedCommonJsDependencies": [
+              "@identy/identy-ocr",
+              "seedrandom",
+              "long",
+              "jquery",
+              "@identy/identy-common"
+            ],
             "scripts": [],
             "main": "src/main.ts",
             "extraWebpackConfig": "webpack.config.js",
@@ -31,6 +54,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.production.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",

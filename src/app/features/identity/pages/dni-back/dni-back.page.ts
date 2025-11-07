@@ -5,6 +5,8 @@ import {
   OnDestroy,
   inject,
   computed,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { BaseComponent } from '../../../../shared/base/base.component';
@@ -12,12 +14,20 @@ import { TextService } from '../../../../core/services/text.service';
 import { IdentityStoreService } from '../../../../core/services/identity-store.service';
 import { NavigationComponent } from '../../components/navigation/navigation.component';
 import { TitleSectionComponent } from '../../components/title-section/title-section.component';
-import { CameraComponent } from '../../components/camera/camera.component';
+import {
+  CardDetectionMode,
+  SdkOptionsType,
+  DocumentType,
+  TransactionMode,
+  Template,
+  CardOcrSDK,
+} from '@identy/identy-ocr';
+import { LOCALIZATIONSOCR } from '../../../../constants/localizations';
 
 @Component({
   selector: 'app-dni-back-page',
   standalone: true,
-  imports: [NavigationComponent, TitleSectionComponent, CameraComponent],
+  imports: [NavigationComponent, TitleSectionComponent],
   templateUrl: './dni-back.page.html',
   styleUrl: './dni-back.page.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -26,6 +36,7 @@ export class DniBackPageComponent
   extends BaseComponent
   implements OnInit, OnDestroy
 {
+  @ViewChild('identyRef') identyRef!: ElementRef<HTMLDivElement>;
   isCameraActive = false;
   isCaptured = false;
   errorMessage = '';
@@ -55,9 +66,157 @@ export class DniBackPageComponent
 
   ngOnInit(): void {
     // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
-    setTimeout(() => {
-      this.initializeCamera();
-    }, 0);
+    // setTimeout(() => {
+    //   this.initializeCamera();
+    // }, 0);
+    this.triggerCapture();
+  }
+
+  triggerCapture() {
+    return new Promise((resolve) => {
+      this.captureOne()
+        .then((final: any) => {
+          resolve(final);
+        })
+        .catch();
+    });
+  }
+
+  captureOne() {
+    return new Promise((resolve, reject) => {
+      this.runCaptureOCR()
+        .then((response: any) => {
+          // const parsed =
+          //   typeof response === 'object'
+          //     ? postData(response)
+          //     : postData1(response);
+          // return resolve(parsed);
+        })
+        .catch((err: any) => {
+          return reject(err);
+        });
+    });
+  }
+
+  runCaptureOCR() {
+    return new Promise((resolve, reject) => {
+      // abortCurrentSdk();
+
+      const base: SdkOptionsType = {
+        a4IntegrityCheck: true,
+        allowClose: false,
+        barcodeCheck: false,
+        cardtype: DocumentType.PERU_ID_CARD,
+        debug: false,
+        detectionModes: [CardDetectionMode.FRONT, CardDetectionMode.BACK],
+        transaction: { type: TransactionMode.CAPTURE },
+        requiredTemplates: [Template.JPEG],
+        localization: LOCALIZATIONSOCR[1].localization,
+        graphics: {
+          silhouette: {
+            enable: true,
+          },
+          training: {
+            show: false,
+          },
+        },
+        selectAsFile: false,
+        showCaptureTraining: false,
+        skipSupportCheck: false,
+        useFlash: false,
+        exitTimout: 45000,
+        events: {
+          onCardFaceCaptureSuccess: (face: string) => {
+            return new Promise((resolve) => {
+              if (face === 'FRONT') {
+                console.log('FRONT CAPTURED');
+                // setStep('SUCCESS');
+                // resetAttempts('ocr');
+                // setTimeout(() => {
+                //   setStep('BACK');
+                //   resolve(null);
+                // }, 3000);
+              } else {
+                console.log('BACK CAPTURED');
+                // setStep('SUCCESS');
+                // resetAttempts('ocr');
+                // setTimeout(() => {
+                //   resolve(null);
+                // }, 500);
+              }
+            });
+          },
+        },
+      };
+      const cardSdk = new CardOcrSDK(base);
+      // sdkRef.current = cardSdk;
+
+      this.initializeVideoDOM();
+
+      cardSdk.onInit = () => {
+        cardSdk
+          .capture()
+          .then(async (blob: any) => {
+            return resolve(blob);
+          })
+          .catch((error) => {
+            console.error('OCR Capture error:', error);
+            // setStep('STOP');
+            // setTimeExceed(true);
+            // if (error.message === 'FEEDBACK_CAMERA_ACQUIRING_FAILED') {
+            //   sethasCameraPermission(false);
+            // } else {
+            //   setStep('STOP');
+            //   showErrorByDictionary?.(error.message, 'ocr', {
+            //     dictionary: ERROR_MESSAGES_OCR,
+            //     onCloseFn: () => {
+            //       setStepBio(1);
+            //     },
+            //   });
+            // }
+            // return resolve(null);
+          });
+      };
+      cardSdk.initialize().catch((error: any) => {
+        console.error('SDK Initialization error:', error);
+        // setTimeExceed(true);
+        // reject(error);
+        // setStep('STOP');
+        // showErrorByDictionary?.(error.message, 'ocr', {
+        //   dictionary: ERROR_MESSAGES_OCR,
+        //   onCloseFn: () => {
+        //     setStepBio(1);
+        //   },
+        // });
+      });
+    });
+  }
+
+  initializeVideoDOM() {
+    const interval = setInterval(() => {
+      try {
+        const identyVideo = document.getElementsByClassName(
+          'ui-dialog identy-ocr-dialog identy-capture-dialog noclose ui-widget ui-widget-content ui-front'
+        );
+        if (identyVideo && identyVideo.length > 0) {
+          const parent = identyVideo[0] as HTMLElement;
+          const tbar = parent.getElementsByClassName('button_box');
+          Array.from(tbar).forEach((child) => {
+            child.remove();
+          });
+          Array.from(identyVideo).forEach((identyElement) => {
+            this.identyRef?.nativeElement.appendChild(identyElement);
+          });
+          const video = document.querySelector('video.desktop');
+          if (video) {
+            video.removeAttribute('class');
+          }
+          clearInterval(interval);
+        }
+      } catch {
+        clearInterval(interval);
+      }
+    }, 200);
   }
 
   override ngOnDestroy(): void {
