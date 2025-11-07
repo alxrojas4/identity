@@ -92,8 +92,10 @@ export class OnboardingPageComponent extends BaseComponent implements OnInit {
    * Continues to the next step
    */
   continue(): void {
-    this.identityStore.setCurrentStep('dni-front');
-    this.router.navigate(['/biometria/dni-front']);
+    // this.identityStore.setCurrentStep('dni-front');
+    // this.router.navigate(['/biometria/dni-front']);
+    this.identityStore.setCurrentStep('dni-back');
+    this.router.navigate(['/biometria/dni-back']);
   }
 
   /**
