@@ -6,7 +6,6 @@ import {
   inject,
   computed,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { BaseComponent } from '../../../../shared/base/base.component';
 import { TextService } from '../../../../core/services/text.service';
 import { IdentityStoreService } from '../../../../core/services/identity-store.service';
@@ -32,7 +31,6 @@ export class SelfiePageComponent
 
   private readonly textService = inject(TextService);
   private readonly identityStore = inject(IdentityStoreService);
-  private readonly router = inject(Router);
 
   readonly titlePrefix = this.textService.getTextSignal(
     'identity.selfie.title.prefix'
@@ -80,7 +78,7 @@ export class SelfiePageComponent
 
     // Navigate to next step after a short delay
     setTimeout(() => {
-      this.router.navigate(['/biometria/success']);
+      this.identityStore.setCurrentStep('success');
     }, 2000);
   }
 
@@ -97,7 +95,7 @@ export class SelfiePageComponent
    */
   goBack(): void {
     this.isCameraActive = false;
-    this.router.navigate(['/biometria/dni-back']);
+    this.identityStore.setCurrentStep('dni-back');
   }
 
   /**

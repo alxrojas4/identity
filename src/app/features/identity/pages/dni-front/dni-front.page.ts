@@ -6,7 +6,6 @@ import {
   inject,
   computed,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { BaseComponent } from '../../../../shared/base/base.component';
 import { TextService } from '../../../../core/services/text.service';
 import { IdentityStoreService } from '../../../../core/services/identity-store.service';
@@ -32,7 +31,6 @@ export class DniFrontPageComponent
 
   private readonly textService = inject(TextService);
   private readonly identityStore = inject(IdentityStoreService);
-  private readonly router = inject(Router);
 
   readonly titlePrefix = this.textService.getTextSignal(
     'identity.dni-front.title.prefix'
@@ -83,7 +81,7 @@ export class DniFrontPageComponent
 
     // Navigate to next step after a short delay
     setTimeout(() => {
-      this.router.navigate(['/biometria/dni-back']);
+      this.identityStore.setCurrentStep('dni-back');
     }, 2000);
   }
 
@@ -100,7 +98,7 @@ export class DniFrontPageComponent
    */
   goBack(): void {
     this.isCameraActive = false;
-    this.router.navigate(['/biometria/onboarding']);
+    this.identityStore.setCurrentStep('onboarding');
   }
 
   /**

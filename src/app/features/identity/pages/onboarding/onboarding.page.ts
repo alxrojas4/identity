@@ -5,7 +5,6 @@ import {
   inject,
   computed,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { BaseComponent } from '../../../../shared/base/base.component';
 import { TextService } from '../../../../core/services/text.service';
 import { IdentityStoreService } from '../../../../core/services/identity-store.service';
@@ -33,7 +32,6 @@ export class OnboardingPageComponent extends BaseComponent implements OnInit {
 
   private readonly textService = inject(TextService);
   private readonly identityStore = inject(IdentityStoreService);
-  private readonly router = inject(Router);
 
   readonly titlePrefix = this.textService.getTextSignal(
     'identity.onboarding.title.prefix'
@@ -92,16 +90,14 @@ export class OnboardingPageComponent extends BaseComponent implements OnInit {
    * Continues to the next step
    */
   continue(): void {
-    // this.identityStore.setCurrentStep('dni-front');
-    // this.router.navigate(['/biometria/dni-front']);
-    this.identityStore.setCurrentStep('dni-back');
-    this.router.navigate(['/biometria/dni-back']);
+    this.identityStore.setCurrentStep('dni-front');
   }
 
   /**
    * Navigates back to previous page
    */
   goBack(): void {
-    this.router.navigate(['/']);
+    // This can be handled by the parent component or left empty
+    // depending on your navigation requirements
   }
 }

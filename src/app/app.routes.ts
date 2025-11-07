@@ -1,11 +1,10 @@
 import { Routes } from '@angular/router';
-
-import { IDENTITY_ROUTES } from './features/identity.routes';
+import { IdentityEntryComponent } from './features/identity-entry.component';
 
 export const routes: Routes = [
   {
     path: 'biometria',
-    children: IDENTITY_ROUTES,
+    component: IdentityEntryComponent,
   },
   {
     path: '',

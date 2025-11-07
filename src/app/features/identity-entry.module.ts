@@ -18,7 +18,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [IdentityEntryComponent],
-  imports: [RouterModule.forChild(routes)],
+  declarations: [],
+  imports: [RouterModule.forChild(routes), IdentityEntryComponent],
 })
 export class IdentityEntryModule {}
