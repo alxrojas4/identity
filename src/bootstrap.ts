@@ -14,8 +14,8 @@ defineCustomElements();
 (async () => {
   try {
     const licenseOrc = environment.OCR_LICENSE;
-    const apiModels = environment.API_MODELS;
-    const apiPubKey = environment.API_PUBKEY;
+    const apiModels = `${environment.IDENTY_API_BASE_URL}/v1/models`;
+    const apiPubKey = `${environment.IDENTY_API_BASE_URL}/v1/pub_key`;
     const options = [
       { name: 'LogAPITrigger', value: 'true' },
       { name: 'requestID', value: '8f1b8a25-6b22-4de8-bc74-10e0ac34109a' },
