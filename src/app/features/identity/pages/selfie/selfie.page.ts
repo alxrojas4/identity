@@ -115,9 +115,6 @@ export class SelfiePageComponent
       if (validationResult.isValid) {
         const processFace = structuredClone(photoData);
         delete (processFace as any).data?.templates?.JPEG;
-
-        const imageData = await this.blobToBase64(blob);
-        this.identityStore.setSelfieImage(imageData);
         this.isCaptured = true;
 
         await delay(3000);
@@ -220,24 +217,6 @@ export class SelfiePageComponent
     // TODO: Implement error message dictionary lookup
     // For now, return the error code as-is
     return errorCode;
-  }
-
-  /**
-   * Converts a Blob to a base64 string.
-   *
-   * @param {Blob} blob - The blob to convert
-   * @returns {Promise<string>} A promise that resolves with the base64 string
-   */
-  private blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        resolve(base64String);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
   }
 
   override ngOnDestroy(): void {
