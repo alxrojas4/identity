@@ -4,8 +4,9 @@ import {
   OnInit,
   OnDestroy,
   inject,
-  computed,
 } from '@angular/core';
+import { FaceSDK } from '@identy/identy-face';
+
 import { BaseComponent } from '../../../../shared/base/base.component';
 import { TextService } from '../../../../core/services/text.service';
 import { IdentityStoreService } from '../../../../core/services/identity-store.service';
@@ -25,6 +26,7 @@ export class SelfiePageComponent
   extends BaseComponent
   implements OnInit, OnDestroy
 {
+  sdk!: FaceSDK | null;
   isCameraActive = false;
   isCaptured = false;
   errorMessage = '';
@@ -57,7 +59,19 @@ export class SelfiePageComponent
 
   override ngOnDestroy(): void {
     this.isCameraActive = false;
+    this.destroySdk();
     super.ngOnDestroy();
+  }
+
+  private async destroySdk() {
+    try {
+      if (this.sdk) {
+        await this.sdk.abort();
+        this.sdk = null;
+      }
+    } catch (error) {
+      console.error('Cannot abort face sdk', error);
+    }
   }
 
   /**
